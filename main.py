@@ -24,34 +24,13 @@ def rotate_left(img):
     rotated = cv2.warpAffine(img, M, (w, h))
     return rotated
 
-def convert2Square(image):
-    # Function to convert image to a square by padding
-    h, w = image.shape[:2]
-    if h > w:
-        diff = h - w
-        pad1, pad2 = diff // 2, diff - diff // 2
-        image = cv2.copyMakeBorder(image, 0, 0, pad1, pad2, cv2.BORDER_CONSTANT, value=[0, 0, 0])
-    elif w > h:
-        diff = w - h
-        pad1, pad2 = diff // 2, diff - diff // 2
-        image = cv2.copyMakeBorder(image, pad1, pad2, 0, 0, cv2.BORDER_CONSTANT, value=[0, 0, 0])
-    return image
-
 def preprocess_LP_img(img):
-  img = convert2Square(img)
   gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   gray = cv2.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv2.INTER_LINEAR)
   gray = cv2.equalizeHist(gray)
 
   #Appy Gaussian Filter to reduce noise
   blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-  #---------------------------------
-  # bilateral filter
-  blurred = cv2.bilateralFilter(blurred, 9, 75, 75)
-
-  # threshold = cv2.threshold(blurred,140, 255, cv2.THRESH_BINARY_INV)
-
-  #---------------------------------
   return blurred
 
 def main():
@@ -93,16 +72,19 @@ def main():
       conf = box.conf[0].item()
       
       # crop license plate
-      license_plate = img[cords[1]:cords[3], cords[0]:cords[2]]
+      # license_plate = img[cords[1]:cords[3], cords[0]:cords[2]]
+      x = 5
+      license_plate_cropped = img[(cords[1]):(cords[3]), (cords[0]+x):(cords[2]-x)]
 
       # preprocess license plate
-      preprocessed_img = preprocess_LP_img(license_plate)
+      preprocessed_img = preprocess_LP_img(license_plate_cropped)
 
       reader = easyocr.Reader(['en'], gpu=False)
-      text=reader.readtext(preprocessed_img)
+      detections = reader.readtext(preprocessed_img)
+      detections = sorted(detections, key=lambda x: (x[0][1], x[0][0]))
 
       # read license plate
-      license_plate_text, license_plate_text_score = read_license_plate(text)
+      license_plate_text, license_plate_text_score = read_license_plate(detections)
 
       # print(f"license_plate_text: {license_plate_text}")
       if license_plate_text == label:

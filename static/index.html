@@ -12,19 +12,71 @@
             margin: 10px 0;
             border-radius: 5px;
         }
+        #snackbar {
+        visibility: hidden;
+        min-width: 250px;
+        margin-left: -125px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1;
+        left: 50%;
+        bottom: 30px;
+        font-size: 17px;
+        }
+
+        #snackbar.show {
+        visibility: visible;
+        -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @-webkit-keyframes fadein {
+        from {bottom: 0; opacity: 0;} 
+        to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+        from {bottom: 0; opacity: 0;}
+        to {bottom: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+        from {bottom: 30px; opacity: 1;} 
+        to {bottom: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+        from {bottom: 30px; opacity: 1;}
+        to {bottom: 0; opacity: 0;}
+        }
     </style>
 </head>
 <body>
     <h1 class="text-center">License Plate Detection</h1>
     <div class="container text-center">
         <input type="file" id="imageInput" class="form-control mb-3" placeholder="input">
+
         <button onclick="uploadImage()" class="btn btn-primary">Detect</button>
         <div id="resultContainer" class="mt-3"></div>
         <div id="imageContainer" class="mt-3"></div>
     </div>
 
+    <div id="snackbar">Image processed successfully.</div>
+
     <script type="text/javascript">
+        function myFunction(message) {
+            var x = document.getElementById("snackbar");
+            x.textContent = message;
+            x.className = "show";
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        }
+
         async function uploadImage() {
+            myFunction("Processing image...");
             const input = document.getElementById("imageInput");
             if (!input.files[0]){
                 alert("Please select a file to upload");

@@ -46,16 +46,14 @@ def preprocess_LP_img(img):
   #Appy Gaussian Filter to reduce noise
   blurred = cv2.GaussianBlur(gray, (5, 5), 0)
   #---------------------------------
-  blurred = cv2.bilateralFilter(blurred, 5, 50, 50)
-
-  # threshold = cv2.threshold(blurred,140, 255, cv2.THRESH_BINARY_INV)
+  # blurred = cv2.bilateralFilter(blurred, 5, 50, 50)
   #---------------------------------
   return blurred
 
 
 def main():
   # load model and image
-  img_name = "AQUA2_09290_checkin_2020-10-22-10-47kCHb4hd9Qd.jpg"
+  img_name = "AQUA2_52911_checkin_2020-10-25-8-52w2paLJIm01.jpg"
   LP_model = YOLO('./model/LP_model.pt')
   dataset_label_path = "./dataset/test/new_test.csv"
   dataset_img_path = "./dataset/test/test/"
@@ -70,8 +68,10 @@ def main():
   print("label", label)
 
   img = cv2.imread(img_path)
-  # img = cv2.resize(img, (640, 640), interpolation=cv2.INTER_LINEAR)
-  
+  img = cv2.resize(img, (640, 640), interpolation=cv2.INTER_LINEAR)
+
+  # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
   # get license plate
   results = LP_model.predict(img)
   result = results[0]
@@ -96,38 +96,25 @@ def main():
   # crop license plate
   license_plate = img[cords[1]:cords[3], cords[0]:cords[2]]
 
-  # preprocessed_img = preprocess_LP_img(license_plate)
+  # crop image to get license plate
+  # x = 5
+  # license_plate = img[(cords[1]):(cords[3]), (cords[0]+x):(cords[2]-x)]
 
-  # license_plate_crop_gray = cv2.cvtColor(license_plate, cv2.COLOR_BGR2GRAY)
-  # _, license_plate_crop_thresh = cv2.threshold(license_plate_crop_gray,140, 255, cv2.THRESH_BINARY_INV)
+  # # preprocess license plate
+  preprocessed_img = preprocess_LP_img(license_plate)
 
-  # cv2.imshow('preprocessed_img', license_plate_crop_thresh)
-  # cv2.waitKey(0)
+  cv2.imshow("license_plate", preprocessed_img)
+  cv2.waitKey(0)
 
-  preprocess_LP_imgs = preprocess_LP_img(license_plate)
+  reader = easyocr.Reader(['en'], gpu=False)
+  detections = reader.readtext(preprocessed_img)
+  detections = sorted(detections, key=lambda x: (x[0][1], x[0][0]))
 
-  easy = easyocr.Reader(['en'])
-  detections = easy.readtext(preprocess_LP_imgs)
+  # read license plate
+  license_plate_text, license_plate_text_score = read_license_plate(detections)
 
-  if(len(detections) == 2):
-      bbox1, text1, score1 = detections[0]
-      bbox2, text2, score2 = detections[1]
-      score = (score1 + score2) / 2
-      text = text1 + text2
-      print(text)
-  elif len(detections) == 1:
-      bbox1, text1, score1 = detections[0]
-      score = score1
-      text = text1
-      print(text)
-  else:
-      print("No text detected")
-
-
-  # license_plate_text, license_plate_text_score = read_license_plate(preprocessed_img)
-
-  # print(f"license_plate_text: {license_plate_text}")
-  # print(f"license_plate_text_score: {license_plate_text_score}")
+  print(f"license_plate_text: {license_plate_text}")
+  print(f"license_plate_text_score: {license_plate_text_score}")
 
 
 
