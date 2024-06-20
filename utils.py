@@ -1,7 +1,7 @@
 import easyocr
 import string
 
-reader = easyocr.Reader(['en'], gpu=False)
+# reader = easyocr.Reader(['en'], gpu=False)
 
 # Mapping dictionaries for character conversion
 dict_char_to_int = {'O': '0',
@@ -96,8 +96,8 @@ def format_license(text):
 
     return license_plate_
 
-def read_license_plate(license_plate_crop):
-    detections = reader.readtext(license_plate_crop)
+def read_license_plate(detections):
+    # detections = reader.readtext(license_plate_crop)
     text = ""
     score = 0.0
     if(len(detections) == 2):

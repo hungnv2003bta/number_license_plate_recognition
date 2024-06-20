@@ -4,6 +4,7 @@ from utils import read_license_plate
 import pandas as pd
 import os
 import numpy as np
+import easyocr
 
 def rotate_right(img):
     angle = -30
@@ -48,10 +49,10 @@ def preprocess_LP_img(img):
   # bilateral filter
   blurred = cv2.bilateralFilter(blurred, 9, 75, 75)
 
-  threshold = cv2.threshold(blurred,140, 255, cv2.THRESH_BINARY_INV)
+  # threshold = cv2.threshold(blurred,140, 255, cv2.THRESH_BINARY_INV)
 
   #---------------------------------
-  return threshold
+  return blurred
 
 def main():
   # load model and image
@@ -97,8 +98,11 @@ def main():
       # preprocess license plate
       preprocessed_img = preprocess_LP_img(license_plate)
 
+      reader = easyocr.Reader(['en'], gpu=False)
+      text=reader.readtext(preprocessed_img)
+
       # read license plate
-      license_plate_text, license_plate_text_score = read_license_plate(preprocessed_img)
+      license_plate_text, license_plate_text_score = read_license_plate(text)
 
       # print(f"license_plate_text: {license_plate_text}")
       if license_plate_text == label:

@@ -48,9 +48,9 @@ def preprocess_LP_img(img):
   #---------------------------------
   blurred = cv2.bilateralFilter(blurred, 5, 50, 50)
 
-  threshold = cv2.threshold(blurred,140, 255, cv2.THRESH_BINARY_INV)
+  # threshold = cv2.threshold(blurred,140, 255, cv2.THRESH_BINARY_INV)
   #---------------------------------
-  return threshold
+  return blurred
 
 
 def main():
@@ -104,10 +104,10 @@ def main():
   # cv2.imshow('preprocessed_img', license_plate_crop_thresh)
   # cv2.waitKey(0)
 
-  preprocess_LP_img = preprocess_LP_img(license_plate)
+  preprocess_LP_imgs = preprocess_LP_img(license_plate)
 
   easy = easyocr.Reader(['en'])
-  detections = easy.readtext(preprocess_LP_img )
+  detections = easy.readtext(preprocess_LP_imgs)
 
   if(len(detections) == 2):
       bbox1, text1, score1 = detections[0]
