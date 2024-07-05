@@ -11,6 +11,7 @@ dict_char_to_int = {'O': '0',
                     'Z': '2',
                     'J': '3',
                     'B': '3',
+                    'B': '3',
                     'A': '4',
                     'L': '4',
                     'S': '5',
@@ -42,6 +43,7 @@ def license_complies_format(text):
         if (text[0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[0] in dict_char_to_int.keys()) and \
             (text[1] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[1] in dict_char_to_int.keys()) and \
             (text[2] in string.ascii_uppercase or text[2] in dict_int_to_char.keys()) and \
+            (text[2] in string.ascii_uppercase or text[2] in dict_int_to_char.keys()) and \
             (text[3] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[3] in dict_char_to_int.keys()) and \
             (text[4] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[4] in dict_char_to_int.keys()) and \
             (text[5] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[5] in dict_char_to_int.keys()) and \
@@ -56,6 +58,7 @@ def license_complies_format(text):
     elif (len_text == 7):
         if (text[0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[0] in dict_char_to_int.keys()) and \
             (text[1] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[1] in dict_char_to_int.keys()) and \
+            (text[2] in string.ascii_uppercase or text[2] in dict_int_to_char.keys()) and \
             (text[2] in string.ascii_uppercase or text[2] in dict_int_to_char.keys()) and \
             (text[3] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[3] in dict_char_to_int.keys()) and \
             (text[4] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[4] in dict_char_to_int.keys()) and \
@@ -90,10 +93,10 @@ def format_license(text):
 
     return license_plate_
 
-def read_license_plate(license_plate_crop):
-    detections = []
-    detections = reader.readtext(license_plate_crop)
-    detections = sorted(detections, key=lambda x: (x[0][1], x[0][0]))
+def read_license_plate(detections):
+    # detections = []
+    # detections = reader.readtext(license_plate_crop)
+    # detections = sorted(detections, key=lambda x: (x[0][1], x[0][0]))
     if detections == []:
         return None, None
 
@@ -105,6 +108,7 @@ def read_license_plate(license_plate_crop):
     
     text = text.upper()
     # replace all characters not number and alphabet
+    text = ''.join(e for e in text if e.isalnum())
     text = ''.join(e for e in text if e.isalnum())
     if license_complies_format(text):
         return format_license(text), score

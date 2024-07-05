@@ -227,10 +227,10 @@ def main():
 
         preprocessed_img = preprocess_LP_img(license_plate)
 
-        # save_path = os.path.join('./img', f"{class_id}.jpg")
-        # cv2.imwrite(save_path, license_plate)
-
-        license_plate_text, _ = read_license_plate(preprocessed_img)
+        reader = easyocr.Reader(['en'], gpu=False)
+        detections = reader.readtext(preprocessed_img)
+        detections = sorted(detections, key=lambda x: (x[0][1], x[0][0]))
+        license_plate_text, license_plate_text_score = read_license_plate(detections)
         
         print(f'stt: {idx} -  {label} - {license_plate_text}')
         if license_plate_text == label:
