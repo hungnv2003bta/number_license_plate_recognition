@@ -206,16 +206,16 @@ async def read_root():
 async def detect(file: UploadFile = File(...)):
     try:
         contents = await file.read()
-        image = cv2.imdecode(np.frombuffer(contents, np.uint8), cv2.IMREAD_COLOR)
-        if image is None:
+        img = cv2.imdecode(np.frombuffer(contents, np.uint8), cv2.IMREAD_COLOR)
+        if img is None:
             logging.error("Failed to decode image.")
             raise HTTPException(status_code=400, detail="Invalid image format.")
         logging.info("Image successfully read and decoded.")
 
-        image = cv2.resize(image, (640, 640), interpolation=cv2.INTER_LINEAR)
+        img = cv2.resize(img, (640, 640), interpolation=cv2.INTER_LINEAR)
 
         # Detect license plate
-        results = license_plate_detector.predict(image)
+        results = license_plate_detector.predict(img)
         result = results[0]
 
         # check if can not detect license plate
@@ -229,8 +229,6 @@ async def detect(file: UploadFile = File(...)):
             results = license_plate_detector.predict(img)
             result = results[0]
             
-        box = result.boxes[0]
-
         if len(result.boxes) == 0:
             raise HTTPException(status_code=404, detail="No license plate detected.")
 
@@ -261,7 +259,8 @@ async def detect(file: UploadFile = File(...)):
     except Exception as e:
         logging.error(f"Error processing image: {e}")
         raise HTTPException(status_code=500, detail="Error processing image.")
+
     
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
