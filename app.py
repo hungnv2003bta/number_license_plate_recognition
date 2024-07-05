@@ -220,12 +220,12 @@ async def detect(file: UploadFile = File(...)):
 
         # check if can not detect license plate
         if len(result.boxes) == 0:
-            img = rotate_right(img)
+            img = rotate_right(image)
             results = license_plate_detector.predict(img)
             result = results[0]
         
         if len(result.boxes) == 0:
-            img = rotate_left(img)
+            img = rotate_left(image)
             results = license_plate_detector.predict(img)
             result = results[0]
             
