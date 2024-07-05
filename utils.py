@@ -5,33 +5,27 @@ reader = easyocr.Reader(['en'], gpu=False)
 
 # Mapping dictionaries for character conversion
 dict_char_to_int = {'O': '0',
-                    'I': '1',
-                    'J': '3',
-                    'A': '4',
-                    'G': '6',
-                    'S': '5',
-                    'B': '3',
                     'U': '0',
-                    'Z': '2',
                     'Q': '0',
-                    'D': '0',
-                    'T': '1',
-                    'L': '1',
-                    'g': '9',
-                    }
+                    'I': '1',
+                    'Z': '2',
+                    'J': '3',
+                    'B': '3',
+                    'A': '4',
+                    'L': '4',
+                    'S': '5',
+                    'G': '6',
+                    'T': '7'}
 
-dict_int_to_char = {'0': 'D',
+dict_int_to_char = {'0': 'O',
                     '1': 'I',
+                    '2': 'Z',
                     '3': 'J',
                     '4': 'A',
                     '6': 'G',
                     '5': 'S',
-                    '2': 'Z',
                     '7': 'T',
-                    '8': 'B',
-                    'm': 'M',
-                    's': 'S',
-                    }
+                    '8': 'B'}
 
 def license_complies_format(text):
     """
@@ -47,7 +41,7 @@ def license_complies_format(text):
     if (len_text == 8):
         if (text[0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[0] in dict_char_to_int.keys()) and \
             (text[1] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[1] in dict_char_to_int.keys()) and \
-            (text[2] in string.ascii_uppercase or text[4] in dict_int_to_char.keys()) and \
+            (text[2] in string.ascii_uppercase or text[2] in dict_int_to_char.keys()) and \
             (text[3] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[3] in dict_char_to_int.keys()) and \
             (text[4] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[4] in dict_char_to_int.keys()) and \
             (text[5] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[5] in dict_char_to_int.keys()) and \
@@ -62,7 +56,7 @@ def license_complies_format(text):
     elif (len_text == 7):
         if (text[0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[0] in dict_char_to_int.keys()) and \
             (text[1] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[1] in dict_char_to_int.keys()) and \
-            (text[2] in string.ascii_uppercase or text[4] in dict_int_to_char.keys()) and \
+            (text[2] in string.ascii_uppercase or text[2] in dict_int_to_char.keys()) and \
             (text[3] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[3] in dict_char_to_int.keys()) and \
             (text[4] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[4] in dict_char_to_int.keys()) and \
             (text[5] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[5] in dict_char_to_int.keys()) and \
@@ -97,24 +91,21 @@ def format_license(text):
     return license_plate_
 
 def read_license_plate(license_plate_crop):
+    detections = []
     detections = reader.readtext(license_plate_crop)
-    text = ""
-    score = 0.0
-    if(len(detections) == 2):
-        bbox1, text1, score1 = detections[0]
-        bbox2, text2, score2 = detections[1]
-        score = (score1 + score2) / 2
-        text = text1 + text2
-    elif len(detections) == 1:
-        bbox1, text1, score1 = detections[0]
-        score = score1
-        text = text1
-    else:
+    detections = sorted(detections, key=lambda x: (x[0][1], x[0][0]))
+    if detections == []:
         return None, None
-    
-    # replace all characters not number and alphabet
-    text = ''.join(e for e in text if e.isalnum() or e == ' ')
 
+    bbox, text, score = detections[0]
+
+    if len(detections) == 2:
+        bbox1, text1, score1 = detections[1]
+        text = text + text1
+    
+    text = text.upper()
+    # replace all characters not number and alphabet
+    text = ''.join(e for e in text if e.isalnum())
     if license_complies_format(text):
         return format_license(text), score
     else:
