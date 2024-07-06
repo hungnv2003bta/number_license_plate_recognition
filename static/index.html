@@ -96,8 +96,8 @@
                 displayDetectionResult(result);
                 displayImage(file);
             } catch (error) {
-                console.error('Error:', error);
-                alert('Failed!');
+                displayImage(file);
+                displayDetectionResult({license_plate: {text: 'Không thể phát hiện biển số!', bbox_score: 0, text_score: 0}});
             }
         }
 
