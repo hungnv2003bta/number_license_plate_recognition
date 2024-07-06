@@ -123,6 +123,14 @@
             img.src = URL.createObjectURL(file);
             img.onload = function() {
                 URL.revokeObjectURL(this.src);
+
+                // Resize the image to 640x640
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 640;
+                canvas.height = 640;
+                ctx.drawImage(img, 0, 0, 640, 640);
+                img.src = canvas.toDataURL();
             }
             imageContainer.innerHTML = '';
             imageContainer.appendChild(img);
